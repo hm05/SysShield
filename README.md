@@ -19,6 +19,29 @@
 ## <div align="center">⚙️ Installation and Setup ⚙️</div>
 
 ## <div align="center">📁 Application Structure 📁</div>
+The application is divided into 3 parts
+- Client Utility
+- Client Dashboard
+- Backend
+
+The file structure is 
+SysShield/
+├── client/           # System Utility
+│   ├── __init__.py
+│   ├── disk_check.py
+│   ├── os_check.py
+│   ├── sleep_check.py
+│   └── antivirus_check.py
+├── backend/          # Backend Server
+│   ├── main.py
+│   ├── models.py
+│   └── database/
+├── dashboard/        # Admin Dashboard
+│   └── src/
+├── application/      # Application Package
+│   ├── sysshield.exe
+│   ├── sysshield.dmg
+│   └── sysshield.deb
 
 ## <div align="center">ℹ️ About Application ℹ️</div>
 Version 1.0.0 <br>
