@@ -4,9 +4,9 @@
 
 |   | Platform | Tested on |
 | - | -------- | --------- |
-| 1 | Windows  |           |
-| 2 | Linux    |           |
-| 3 | MacOS    |           |
+| 1 | Windows  |  |
+| 2 | Linux    | Kali 2025.1 rolling |
+| 3 | MacOS    | MacOS Sequoia v15.5 |
 
 ## <div align="center">🚀 Features 🚀</div>
 
@@ -24,7 +24,8 @@ The application is divided into 3 parts
 - Client Dashboard
 - Backend
 
-The file structure is 
+The file structure is
+```
 SysShield/
 ├── client/           # System Utility
 │   ├── __init__.py
@@ -33,16 +34,12 @@ SysShield/
 │   ├── sleep_check.py
 │   └── antivirus_check.py
 ├── backend/          # Backend Server
-│   ├── main.py
-│   ├── models.py
-│   └── database/
 ├── dashboard/        # Admin Dashboard
-│   └── src/
 ├── application/      # Application Package
 │   ├── sysshield.exe
 │   ├── sysshield.dmg
 │   └── sysshield.deb
-
+```
 ## <div align="center">ℹ️ About Application ℹ️</div>
 Version 1.0.0 <br>
 Developed by [Harsh Murjani](https://github.com/hm05) <br>
