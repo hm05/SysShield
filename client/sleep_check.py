@@ -5,8 +5,15 @@
 import subprocess
 
 def sleep_win():
-    print("Checking sleep settings on Windows...")
-    return {"status":"Info","message":"Sleep check not implemented for Windows.","severity":"Low"}
+    try:
+        result = subprocess.run(["powercfg", "-a"], capture_output=True, text=True)
+        states = result.stdout
+        if "Standby" in states:
+            return {"status": "Pass", "message": states, "severity": "Low"}
+        else:
+            return {"status": "Fail", "message": states, "severity": "Medium"}
+    except Exception as e:
+        return {"status": "Error", "message": str(e)}
 
 def sleep_mac():
     print("Checking sleep settings on macOS...")

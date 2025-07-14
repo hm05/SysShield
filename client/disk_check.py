@@ -8,15 +8,44 @@ import re
 def disk_win():
     print("Checking disk encryption on Windows...")
     try:
-        result = subprocess.run(["manage-bde", "-status"], capture_output=True, text=True)
-        if "Fully Encrypted" in result.stdout:
-            return True
+        # Use WMI via PowerShell to get drive letters and ProtectionStatus
+        command = (
+            "Get-WmiObject -Namespace root\\CIMV2\\Security\\MicrosoftVolumeEncryption "
+            "-Class Win32_EncryptableVolume | "
+            "Select-Object DeviceID,DriveLetter,ProtectionStatus"
+        )
+        result = subprocess.run(["powershell", "-Command", command],
+                                capture_output=True, text=True)
+        lines = result.stdout.strip().splitlines()
+
+        unencrypted = []
+        for line in lines:
+            if "DeviceID" in line or "DriveLetter" in line or "ProtectionStatus" in line:
+                continue
+            if "ProtectionStatus" not in line:
+                continue
+            parts = line.strip().split()
+            if len(parts) >= 3 and parts[-1] == "0":
+                drive = parts[1] if parts[1] else parts[0]
+                unencrypted.append(drive)
+
+        if not unencrypted:
+            return {
+                "status": "Pass",
+                "message": "All volumes are encrypted",
+                "severity": "Low"
+            }
         else:
-            print("❌ Disk Encryption status: BitLocker is OFF — please enable it using 'manage-bde' or Settings.")
-            return False
+            return {
+                "status": "Fail",
+                "unencrypted": unencrypted,
+                "message": "Unencrypted volumes detected",
+                "severity": "High"
+            }
+
     except Exception as e:
-        print(f"⚠️ Disk Encryption check failed: {e}")
-        return False
+        return {"status": "Error", "message": str(e)}
+
 
 def disk_linux():
     print("Checking disk encryption on Linux...")

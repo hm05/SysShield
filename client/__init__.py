@@ -5,9 +5,12 @@
 __version__ = "1.0.0"
 __author__ = "Harsh Murjani"
 
-import platform
+import os, sys, subprocess, platform
 import json
+import atexit
+import time
 from datetime import datetime
+from pathlib import Path
 
 from disk_check import disk_win, disk_linux, disk_mac
 from os_check   import os_win,    os_linux,    os_mac
@@ -16,6 +19,13 @@ from antivirus_check import av_win,    av_linux,    av_mac
 
 CACHE_PATH = "os_cache.json"
 LOG_PATH   = "sysshield_logs.json"
+
+def run_sysshield_loop(interval=1800):  # every 30 minutes
+    pid_file = Path("sysshield.pid")
+    pid_file.write_text(str(os.getpid()))
+    while True:
+        run_sysshield()
+        time.sleep(interval)
 
 def detect_os():
     return {
@@ -86,16 +96,16 @@ def run_checks(os_type):
             if label == "Disk Encryption" and isinstance(result, dict):
                 status = result.get("status")
                 unenc  = result.get("unencrypted", [])
-                notes  = result.get("notes", [])
+                msg    = result.get("message", "")
                 if status == "Pass":
                     print(f"✅ {label} status: Pass\n")
                 else:
                     print(f"❌ {label} status: Fail")
-                    print(f"  Unencrypted: {', '.join(unenc)}")
-                    for note in notes:
-                        print(f"  ⚠ {note}")
-                    print()
+                    if unenc:
+                        print(f"  Unencrypted: {', '.join(unenc)}")
+                    print(f"  ⚠ {msg}\n")
                 continue
+
             # -----------------------------------------
 
             # Boolean pass/fail
@@ -144,13 +154,65 @@ def run_checks(os_type):
 
     return results
 
-def run_sysshield():
-    boot_banner()
+def run_sysshield(silent=True):
+    pid_file = Path("sysshield.pid")
+    pid_file.write_text(str(os.getpid()))  # ← write PID here
+
+    if not silent:
+        boot_banner()
     os_type   = load_cached_os()
     timestamp = datetime.now().isoformat()
     results   = run_checks(os_type)
     log_results(timestamp, os_type, results)
+
+    with open("sysshield_heartbeat.txt", "a") as f:
+        f.write(f"Daemon run at {datetime.now()}\n")
     return results
 
+def daemonize():
+    pid_file = Path("sysshield.pid")
+
+    if pid_file.exists():
+        print("🛡️ SysShield daemon already running.")
+        return
+
+    def remove_pid():
+        if pid_file.exists():
+            pid_file.unlink()
+    atexit.register(remove_pid)
+
+    # Spawn background instance with --run
+    if platform.system() == "Windows":
+        subprocess.Popen(["pythonw", __file__, "--run"], creationflags=subprocess.DETACHED_PROCESS)
+    elif platform.system() == "Darwin" or platform.system() == "Linux":
+        subprocess.Popen([sys.executable, __file__, "--run"],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    else:
+        print("❌ Unsupported platform for daemonization.")
+        return
+
+    pid_file.write_text(str(os.getpid()))
+    print("✅ SysShield daemon started.")
+
+    sys.exit()
+
 if __name__ == "__main__":
-    run_sysshield()
+    if "--stop" in sys.argv:
+        pid_file = Path("sysshield.pid")
+        if pid_file.exists():
+            pid = int(pid_file.read_text())
+            try:
+                os.kill(pid, 9)
+                print("🛑 SysShield daemon stopped.")
+            except Exception as e:
+                print(f"⚠️ Failed to stop daemon: {e}")
+            pid_file.unlink()
+        else:
+            print("ℹ️ No daemon running.")
+        sys.exit()
+
+    elif "--run" in sys.argv:
+        run_sysshield_loop()
+
+    else:
+        daemonize()      # Launch background daemon

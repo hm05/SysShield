@@ -1,3 +1,5 @@
 os_cache.json
 sysshield_logs.json
+sysshield_heartbeat.txt
 client/__pycache__
+dashboard/*

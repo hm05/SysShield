@@ -8,10 +8,16 @@ import subprocess
 def os_win():
     print("Checking Windows update status...")
     try:
+        output = subprocess.run([
+            "powershell",
+            "-Command",
+            "(New-Object -ComObject Microsoft.Update.Session).CreateUpdateSearcher().Search('IsInstalled=0').Updates.Count"
+        ], capture_output=True, text=True)
+        count = int(output.stdout.strip())
         return {
-            "status": "Info",
-            "message": "Update status check not yet implemented for Windows.",
-            "severity": "Low"
+            "status": "Pass" if count == 0 else "Fail",
+            "details": [f"{count} updates available"],
+            "severity": "Medium" if count else "Low"
         }
     except Exception as e:
         return {"status": "Error", "message": str(e)}

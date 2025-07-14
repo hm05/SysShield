@@ -6,8 +6,19 @@
 import subprocess
 
 def av_win():
-    print("Checking antivirus status on Windows...")
-    return {"status":"Info","message":"Antivirus check not implemented for Windows.","severity":"Low"}
+    try:
+        result = subprocess.check_output([
+            "powershell",
+            "(Get-MpComputerStatus).AntivirusEnabled"
+        ], text=True)
+        enabled = "True" in result
+        return {
+            "status": "Pass" if enabled else "Fail",
+            "message": result.strip(),
+            "severity": "Low" if enabled else "Medium"
+        }
+    except Exception as e:
+        return {"status": "Error", "message": str(e)}
 
 def av_mac():
     print("Checking antivirus status on macOS...")

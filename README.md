@@ -4,7 +4,7 @@
 
 |   | Platform | Tested on |
 | - | -------- | --------- |
-| 1 | Windows  |  |
+| 1 | Windows  | Windows 11 Home Single Language (24H2) |
 | 2 | Linux    | Kali 2025.1 rolling |
 | 3 | MacOS    | MacOS Sequoia v15.5 |
 
