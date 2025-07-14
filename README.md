@@ -1,8 +1,4 @@
-<center># SysShield</center>
-Version 1.0.0
-Developed by [Harsh Murjani](https://github.com/hm05) <br>
-> [!NOTE]
-> This project is a part of hiring assignment assigned by [Solsphere AI](https://solsphere.ai/)
+# <div align="center">SysShield</div>
 
 **SysShield** is a System Security application software designed for cross platform installation and usage.
 
@@ -12,11 +8,20 @@ Developed by [Harsh Murjani](https://github.com/hm05) <br>
 | 2 | Linux    |           |
 | 3 | MacOS    |           |
 
-## Features
+## <div align="center">🚀 Features 🚀</div>
+
 - **SysShield** provides a very elegant and interactive user interface to check and manage the system health and issues.
 - The user can check the security of the disks.
 - Check for system updates.
 - Antivirus status.
 - System sleep settings.
 
-## Installation and Setup
+## <div align="center">⚙️ Installation and Setup ⚙️</div>
+
+## <div align="center">📁 Application Structure 📁</div>
+
+## <div align="center">ℹ️ About Application ℹ️</div>
+Version 1.0.0 <br>
+Developed by [Harsh Murjani](https://github.com/hm05) <br>
+> [!NOTE]
+> This project is a part of hiring assignment assigned by [Solsphere AI](https://solsphere.ai/)
