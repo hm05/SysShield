@@ -1,37 +1,28 @@
 # __init__.py
 # 🛡️ SysShield System Utility
+# This file is part of the SysShield project
 # Developed by Harsh Murjani
 
 __version__ = "1.0.0"
 __author__ = "Harsh Murjani"
 
-import os, sys, subprocess, platform
-import json
-import atexit
-import time
+import platform, requests, json, uuid
 from datetime import datetime
-from pathlib import Path
-
 from disk_check import disk_win, disk_linux, disk_mac
-from os_check   import os_win,    os_linux,    os_mac
-from sleep_check   import sleep_win,   sleep_linux,   sleep_mac
-from antivirus_check import av_win,    av_linux,    av_mac
+from os_check import os_win, os_linux, os_mac
+from sleep_check import sleep_win, sleep_linux, sleep_mac
+from antivirus_check import av_win, av_linux, av_mac
 
 CACHE_PATH = "os_cache.json"
-LOG_PATH   = "sysshield_logs.json"
-
-def run_sysshield_loop(interval=1800):  # every 30 minutes
-    pid_file = Path("sysshield.pid")
-    pid_file.write_text(str(os.getpid()))
-    while True:
-        run_sysshield()
-        time.sleep(interval)
+API_URL = "https://localhost:8000/api/system/update"
+LOG_PATH = "sysshield_logs.json"
+API_KEY = "super-secret-key"
 
 def detect_os():
     return {
         "Windows": "windows",
-        "Linux":   "linux",
-        "Darwin":  "macos"
+        "Linux": "linux",
+        "Darwin": "macos"
     }.get(platform.system(), "unknown")
 
 def load_cached_os():
@@ -44,18 +35,36 @@ def load_cached_os():
             json.dump({"os": os_name}, f)
         return os_name
 
-def boot_banner():
-    print("\n🛡️  SysShield Client - v1.0.0")
-    print(f"⏱️  Start Time: {datetime.now():%Y-%m-%d %H:%M:%S}\n")
+def get_mac_address():
+    mac = uuid.getnode()
+    return ':'.join(['{:02x}'.format((mac >> ele) & 0xff)
+                     for ele in range(40, -1, -8)])
 
 def log_results(timestamp, os_type, results):
-    entry = {"timestamp": timestamp, "os": os_type, "results": results}
+    entry = {
+        "machine_id": get_mac_address(),
+        "timestamp": timestamp,
+        "os": os_type,
+        "results": results
+    }
     try:
         with open(LOG_PATH) as f:
             existing = json.load(f)
     except Exception:
         existing = []
     existing.append(entry)
+    try:
+        response = requests.post(
+            API_URL,
+            json=entry,
+            headers={ "x-api-key": API_KEY },
+            verify="cert.pem"
+        )
+        print("POST status:", response.status_code)
+        if response.status_code != 200:
+            print("Warning: Server responded with:", response.text)
+    except requests.exceptions.RequestException as e:
+        print("POST failed:", str(e))
     with open(LOG_PATH, "w") as f:
         json.dump(existing, f, indent=2)
 
@@ -64,19 +73,19 @@ def run_checks(os_type):
         "windows": [
             ("Disk Encryption", disk_win),
             ("OS Update Status", os_win),
-            ("Sleep Settings",  sleep_win),
+            ("Sleep Settings", sleep_win),
             ("Antivirus Status", av_win)
         ],
         "linux": [
             ("Disk Encryption", disk_linux),
             ("OS Update Status", os_linux),
-            ("Sleep Settings",  sleep_linux),
+            ("Sleep Settings", sleep_linux),
             ("Antivirus Status", av_linux)
         ],
         "macos": [
             ("Disk Encryption", disk_mac),
             ("OS Update Status", os_mac),
-            ("Sleep Settings",  sleep_mac),
+            ("Sleep Settings", sleep_mac),
             ("Antivirus Status", av_mac)
         ]
     }
@@ -92,11 +101,10 @@ def run_checks(os_type):
             result = check_func()
             results[label] = result
 
-            # --- Custom block for Disk Encryption ---
             if label == "Disk Encryption" and isinstance(result, dict):
                 status = result.get("status")
-                unenc  = result.get("unencrypted", [])
-                msg    = result.get("message", "")
+                unenc = result.get("unencrypted", [])
+                msg = result.get("message", "")
                 if status == "Pass":
                     print(f"✅ {label} status: Pass\n")
                 else:
@@ -106,27 +114,19 @@ def run_checks(os_type):
                     print(f"  ⚠ {msg}\n")
                 continue
 
-            # -----------------------------------------
-
-            # Boolean pass/fail
             if isinstance(result, bool):
                 if result:
                     print(f"✅ {label} status: Pass\n")
-
-            # Dict-based status
             elif isinstance(result, dict):
                 st = result.get("status")
                 if st == "Pass":
                     print(f"✅ {label} status: Pass\n")
-
                 elif st == "Fail":
-                    # OS Update specific
                     if "total" in result:
-                        tot  = result["total"]
+                        tot = result["total"]
                         kern = result["kernel"]
-                        sev  = result["severity"]
+                        sev = result["severity"]
                         print(f"❌ {label}: {tot} updates ({kern} kernel) [{sev}]")
-                        # top 5
                         for pkg in result["details"][:5]:
                             print(f"  • {pkg}")
                         more = tot - 5
@@ -134,85 +134,26 @@ def run_checks(os_type):
                             print(f"  …and {more} more")
                         print()
                     else:
-                        # generic fail
                         sev = result.get("severity", "Unknown")
                         print(f"❌ {label} status: Fail ({sev})\n")
-
                 elif st == "Error":
                     print(f"⚠️ {label} check failed: {result.get('message')}\n")
-
-                else:  # Info or other
+                else:
                     print(f"ℹ️ {label}: {result.get('message','')}\n")
-
-            # Fallback for plain strings
             else:
                 print(f"📋 {label}: {result}\n")
-
         except Exception as e:
             results[label] = {"status": "Error", "message": str(e)}
             print(f"⚠️ Exception: {e}\n")
-
     return results
 
-def run_sysshield(silent=True):
-    pid_file = Path("sysshield.pid")
-    pid_file.write_text(str(os.getpid()))  # ← write PID here
-
-    if not silent:
-        boot_banner()
-    os_type   = load_cached_os()
+def run_sysshield():
+    print("\n🛡️  SysShield Client - v1.0.0")
+    print(f"⏱️  Run Time: {datetime.now():%Y-%m-%d %H:%M:%S}\n")
+    os_type = load_cached_os()
     timestamp = datetime.now().isoformat()
-    results   = run_checks(os_type)
+    results = run_checks(os_type)
     log_results(timestamp, os_type, results)
 
-    with open("sysshield_heartbeat.txt", "a") as f:
-        f.write(f"Daemon run at {datetime.now()}\n")
-    return results
-
-def daemonize():
-    pid_file = Path("sysshield.pid")
-
-    if pid_file.exists():
-        print("🛡️ SysShield daemon already running.")
-        return
-
-    def remove_pid():
-        if pid_file.exists():
-            pid_file.unlink()
-    atexit.register(remove_pid)
-
-    # Spawn background instance with --run
-    if platform.system() == "Windows":
-        subprocess.Popen(["pythonw", __file__, "--run"], creationflags=subprocess.DETACHED_PROCESS)
-    elif platform.system() == "Darwin" or platform.system() == "Linux":
-        subprocess.Popen([sys.executable, __file__, "--run"],
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    else:
-        print("❌ Unsupported platform for daemonization.")
-        return
-
-    pid_file.write_text(str(os.getpid()))
-    print("✅ SysShield daemon started.")
-
-    sys.exit()
-
 if __name__ == "__main__":
-    if "--stop" in sys.argv:
-        pid_file = Path("sysshield.pid")
-        if pid_file.exists():
-            pid = int(pid_file.read_text())
-            try:
-                os.kill(pid, 9)
-                print("🛑 SysShield daemon stopped.")
-            except Exception as e:
-                print(f"⚠️ Failed to stop daemon: {e}")
-            pid_file.unlink()
-        else:
-            print("ℹ️ No daemon running.")
-        sys.exit()
-
-    elif "--run" in sys.argv:
-        run_sysshield_loop()
-
-    else:
-        daemonize()      # Launch background daemon
+    run_sysshield()

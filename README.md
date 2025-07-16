@@ -27,19 +27,34 @@ The application is divided into 3 parts
 The file structure is
 ```
 SysShield/
-├── client/           # System Utility
+├── README.md                 # Project Documentation
+├── requirements.txt
+├── .gitignore
+├── os_cache.json
+├── sysshield_logs.json
+├── sysshield_heartbeat.txt
+├── client/                   # System Utility
+│   ├── cert.pem
 │   ├── __init__.py
 │   ├── disk_check.py
 │   ├── os_check.py
 │   ├── sleep_check.py
 │   └── antivirus_check.py
-├── backend/          # Backend Server
-├── dashboard/        # Admin Dashboard
-├── application/      # Application Package
-│   ├── sysshield.exe
-│   ├── sysshield.dmg
-│   └── sysshield.deb
 ```
+
+## <div align="center">🧑‍🎨 Figma Design 🧑‍🎨</div>
+
+
+[SysShield Figma Design](https://www.figma.com/proto/ChzaoxofeVl2hSaO4ZWpMX/SysShield-UI?node-id=1-2&p=f&t=DRPElSUJT1yOtfO4-1&scaling=scale-down-width&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=1%3A2)
+**Variables Value**
+Fonts:Kodchasan
+Border Radius: 50px
+Background Color: #FBFAF5
+Secondary Background: #DBE7F3
+Graph Border: #018FC7
+Green: #00B00
+Red: #EA324C
+
 ## <div align="center">ℹ️ About Application ℹ️</div>
 Version 1.0.0 <br>
 Developed by [Harsh Murjani](https://github.com/hm05) <br>
