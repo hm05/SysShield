@@ -10,18 +10,14 @@
 
 ## <div align="center">🚀 Features 🚀</div>
 
-- **SysShield** provides a very elegant and interactive user interface to check and manage the system health and issues.
 - The user can check the security of the disks.
 - Check for system updates.
 - Antivirus status.
 - System sleep settings.
 
-## <div align="center">⚙️ Installation and Setup ⚙️</div>
-
 ## <div align="center">📁 Application Structure 📁</div>
-The application is divided into 3 parts
+The application is divided into 2 parts
 - Client Utility
-- Client Dashboard
 - Backend
 
 The file structure is
@@ -44,16 +40,18 @@ SysShield/
 
 ## <div align="center">🧑‍🎨 Figma Design 🧑‍🎨</div>
 
+> [!NOTE]
+> This is a suggested designed in case of future frontend implementation.
 
-[SysShield Figma Design](https://www.figma.com/proto/ChzaoxofeVl2hSaO4ZWpMX/SysShield-UI?node-id=1-2&p=f&t=DRPElSUJT1yOtfO4-1&scaling=scale-down-width&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=1%3A2)
-**Variables Value**
-Fonts:Kodchasan
-Border Radius: 50px
-Background Color: #FBFAF5
-Secondary Background: #DBE7F3
-Graph Border: #018FC7
-Green: #00B00
-Red: #EA324C
+[SysShield Figma Design](https://www.figma.com/proto/ChzaoxofeVl2hSaO4ZWpMX/SysShield-UI?node-id=1-2&p=f&t=DRPElSUJT1yOtfO4-1&scaling=scale-down-width&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=1%3A2)<br>
+**Variables Value**<br>
+Fonts: Kodchasan<br>
+Border Radius: 50px<br>
+Background Color: #FBFAF5<br>
+Secondary Background: #DBE7F3<br>
+Graph Border: #018FC7<br>
+Green: #00B00<br>
+Red: #EA324C<br>
 
 ## <div align="center">ℹ️ About Application ℹ️</div>
 Version 1.0.0 <br>
