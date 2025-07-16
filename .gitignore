@@ -1,11 +1,9 @@
 os_cache.json
 sysshield_logs.json
 sysshield_heartbeat.txt
-__pycache__
-sysshield_heartbeat.txt
-sysshield_logs.json
 sysshield.pid
 sysshield.spec
+__pycache__
 client/node_modules
 *.pyc
 *.pyo
